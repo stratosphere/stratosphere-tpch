@@ -18,7 +18,7 @@ package eu.stratosphere.tpch.query
 import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
 
-class TPCHQuery01(dop: Int, inPath: String, outPath: String, delta: Int) extends TPCHQuery(dop, inPath, outPath) {
+class TPCHQuery01(queryNo: Int, dop: Int, inPath: String, outPath: String, delta: Int) extends TPCHQuery(queryNo, dop, inPath, outPath) {
 
   case class Aggregate(
     returnFlag: String,
@@ -67,7 +67,9 @@ class TPCHQuery01(dop: Int, inPath: String, outPath: String, delta: Int) extends
         agg.sumDiscount / int2double(agg.countOrder),
         agg.countOrder)))
 
-    val plan = new ScalaPlan(Seq(expression), "TPC-H Query #1")
+    val x: Seq[Int] = Seq(1, 2, 3, 4, 5, 6)
+
+    val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
 
     return plan

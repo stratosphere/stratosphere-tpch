@@ -17,19 +17,21 @@ package eu.stratosphere.tpch.query
 
 import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
-
 import org.joda.time.DateTime
 import scopt.OptionParser
 
 /**
  * An abstract base class for all TPC-H queries.
  */
-abstract class TPCHQuery(dop: Int, inPath: String, outPath: String) extends Serializable {
+abstract class TPCHQuery(queryNo: Int, dop: Int, inPath: String, outPath: String) extends Serializable {
 
-  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
-   * Abstract Methods
-   *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  val queryName = s"TPC-H Query #${queryNo}02d"
 
+  /**
+   * Abstract plan generation method. In concrete implementations, use the
+   * parameters passed to the TPCHQuery subclass to construct a parameterized
+   * ScalaPlan.
+   */
   def plan(): ScalaPlan
 }
 
@@ -159,206 +161,4 @@ object Date {
   def fromString(dateTime: String): DateTime = DateTime.parse(dateTime)
 
   def toString(dateTime: DateTime): String = dateTime.toString("yyyy-MM-dd")
-}
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * CLI Configuration
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-case class TPCHConfig(
-  // generic parameters
-  val `queryNo`: Int = 1,
-  val `dop`: Int = 1,
-  val `inPath`: String = "",
-  val `outPath`: String = "",
-  // query specific parameters
-  val `brands`: Seq[String] = Seq(),
-  val `color`: String = "",
-  val `container`: String = "",
-  val `date`: String = "",
-  val `delta`: Int = 0,
-  val `discount`: Double = 0.00,
-  val `fraction`: Double = 0.00,
-  val `i`: Seq[Int] = Seq(),
-  val `nations`: Seq[String] = Seq(),
-  val `quantities`: Seq[Int] = Seq(),
-  val `region`: String = "",
-  val `segment`: String = "",
-  val `shipmodes`: Seq[String] = Seq(),
-  val `sizes`: Seq[Int] = Seq(),
-  val `type`: String = "",
-  val `words`: Seq[String] = Seq())
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * Companion object
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-object TPCHQuery {
-
-  val NL = System.getProperty("line.separator")
-
-  def parser = new scopt.OptionParser[TPCHConfig]("stratosphere-tpch") {
-    // header
-    head("Stratosphere TPC-H Query Runner", "(version 1.0.0)")
-
-    // help option
-    help("help")
-
-    cmd("Q01")
-      .action { (x, c) => c.copy(queryNo = 1) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[Int]("[delta]")
-          .action { (x, c) => c.copy(`delta` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q02")
-      .action { (x, c) => c.copy(queryNo = 2) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[Int]("[size]")
-          .action { (x, c) => c.copy(`sizes` = c.sizes :+ x) }
-          .text("Query parameter"),
-        arg[String]("[type]")
-          .action { (x, c) => c.copy(`type` = x) }
-          .text("Query parameter"),
-        arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q03")
-      .action { (x, c) => c.copy(queryNo = 3) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[segment]")
-          .action { (x, c) => c.copy(`segment` = x) }
-          .text("Query parameter"),
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q04")
-      .action { (x, c) => c.copy(queryNo = 4) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[out]")
-          .action { (x, c) => c.copy(outPath = x) }
-          .text("Output path for the query result"),
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q05")
-      .action { (x, c) => c.copy(queryNo = 5) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
-          .text("Query parameter"),
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q06")
-      .action { (x, c) => c.copy(queryNo = 6) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter"),
-        arg[Double]("[discount]")
-          .action { (x, c) => c.copy(`discount` = x) }
-          .text("Query parameter"),
-        arg[Int]("[quantity]")
-          .action { (x, c) => c.copy(`quantities` = c.quantities :+ x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q07")
-      .action { (x, c) => c.copy(queryNo = 7) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[nation1]")
-          .action { (x, c) => c.copy(`nations` = c.nations :+ x) }
-          .text("Query parameter"),
-        arg[String]("[nation2]")
-          .action { (x, c) => c.copy(`nations` = c.nations :+ x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q08")
-      .action { (x, c) => c.copy(queryNo = 8) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = c.nations :+ x) }
-          .text("Query parameter"),
-        arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
-          .text("Query parameter"),
-        arg[String]("[type]")
-          .action { (x, c) => c.copy(`type` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q09")
-      .action { (x, c) => c.copy(queryNo = 9) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[color]")
-          .action { (x, c) => c.copy(`color` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q10")
-      .action { (x, c) => c.copy(queryNo = 10) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q11")
-      .action { (x, c) => c.copy(queryNo = 11) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = Seq(x)) }
-          .text("Query parameter"),
-        arg[Double]("[fraction]")
-          .action { (x, c) => c.copy(`fraction` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q12")
-      .action { (x, c) => c.copy(queryNo = 12) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[shipmode1]")
-          .action { (x, c) => c.copy(`shipmodes` = c.shipmodes :+ x) }
-          .text("Query parameter"),
-        arg[String]("[shipmode2]")
-          .action { (x, c) => c.copy(`shipmodes` = c.shipmodes :+ x) }
-          .text("Query parameter"),
-        arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
-          .text("Query parameter" + NL))
-
-    cmd("Q13")
-      .action { (x, c) => c.copy(queryNo = 13) }
-      .children(commonQueryArgs(this): _*)
-      .children(
-        arg[String]("[word1]")
-          .action { (x, c) => c.copy(`shipmodes` = c.words :+ x) }
-          .text("Query parameter"),
-        arg[String]("[word2]")
-          .action { (x, c) => c.copy(`shipmodes` = c.words :+ x) }
-          .text("Query parameter" + NL))
-  }
-
-  def commonQueryArgs(parser: scopt.OptionParser[TPCHConfig]): Seq[scopt.OptionDef[_, eu.stratosphere.tpch.query.TPCHConfig]] = Seq(
-    parser.arg[Int]("[dop]")
-      .action { (x, c) => c.copy(dop = x) }
-      .text("Degree of parallelism"),
-    parser.arg[String]("[in]")
-      .action { (x, c) => c.copy(inPath = x) }
-      .text("Base path for the TPC-H inputs"),
-    parser.arg[String]("[out]")
-      .action { (x, c) => c.copy(outPath = x) }
-      .text("Output path for the query result"))
 }

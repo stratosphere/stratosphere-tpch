@@ -17,25 +17,34 @@ package eu.stratosphere.tpch
 
 import eu.stratosphere.pact.client.LocalExecutor
 import eu.stratosphere.pact.client.RemoteExecutor
-
-import eu.stratosphere.tpch.query.TPCHConfig
+import eu.stratosphere.tpch.config.TPCHConfig
 import eu.stratosphere.tpch.query.TPCHQuery
 import eu.stratosphere.tpch.query.TPCHQuery01
 import eu.stratosphere.scala.ScalaPlan
+import eu.stratosphere.tpch.config.TPCHConfig
 
-abstract class RunJobBase {
+import scopt.TPCHOptionParser
+
+/**
+ * Abstract job runner encapsulating common driver logic.
+ */
+abstract class AbstractJobRunner {
 
   /**
    * Main method.
    */
   def main(args: Array[String]) {
 
-    TPCHQuery.parser.parse(args, TPCHConfig()) map { config =>
+    TPCHOptionParser().parse(args, TPCHConfig()) map { config =>
       try {
-        executeQuery(createQuery(config).plan())
+        createQuery(config)
+          .map(query => executeQuery(query.plan()))
+          .getOrElse {
+            System.err.println(s"Sorry, TPC-H Query #${config.queryNo}%02d is not yet supported.")
+          }
       } catch {
         case e: Throwable => {
-          System.err.println("Error during execution: " + e.getMessage())
+          System.err.println("Unexpected error during execution: " + e.getMessage())
           e.printStackTrace(System.err)
           System.exit(-1)
         }
@@ -46,10 +55,11 @@ abstract class RunJobBase {
   }
 
   /**
-   * Factory method for TPC-H Queries.
+   * Factory method for creation of TPC-H Queries.
    */
-  protected def createQuery(config: TPCHConfig) = config.queryNo match {
-    case 1 => new TPCHQuery01(config.dop, config.inPath, config.outPath, config.delta)
+  protected def createQuery(c: TPCHConfig): Option[TPCHQuery] = c.queryNo match {
+    case 1 => Option(new TPCHQuery01(c.queryNo, c.dop, c.inPath, c.outPath, c.delta))
+    case _ => Option(null)
   }
 
   /**
@@ -58,20 +68,24 @@ abstract class RunJobBase {
   def executeQuery(plan: ScalaPlan)
 }
 
-// You can run TPCH Query X this on a cluster using:
-// mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobLocal QXX 2 file:///tpch/path file:///query/result/path <Query-X-args>"
-object RunJobLocal extends RunJobBase {
+/**
+ * To run TPCH Query X locally with this class using:
+ * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobLocal QXX 2 file:///tpch/path file:///query/result/path <Query-X-args>"
+ */
+object LocalJobRunner extends AbstractJobRunner {
 
   def executeQuery(plan: ScalaPlan) {
     LocalExecutor.execute(plan)
   }
 }
 
-// You can run TPCH Query X this on a cluster using:
-// mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobRemote QXX 2 file:///some/path file:///some/other/path <Query-X-args>"
-object RunJobRemote extends RunJobBase {
+/**
+ * To run TPCH Query X on a cluster with this class using:
+ * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobRemote QXX 2 file:///some/path file:///some/other/path <Query-X-args>"
+ */
+object RemoteJobRunner extends AbstractJobRunner {
 
   def executeQuery(plan: ScalaPlan) {
-    new RemoteExecutor("localhost", 6123, "target/stratosphere-tpch-bin.jar").executePlan(plan)
+    (new RemoteExecutor("localhost", 6123, "target/stratosphere-tpch-bin.jar")).executePlan(plan)
   }
 }

@@ -29,7 +29,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<stratosphere.version>0.4-SNAPSHOT</stratosphere.version>
 		<joda-convert.version>1.5</joda-convert.version>
-		<scopt-version>3.1.0</scopt-version>
+		<scopt-version>3.2.0</scopt-version>
 		<scala.version>2.10.3</scala.version>
 		<joda-time.version>2.3</joda-time.version>
 	</properties>
