@@ -20,6 +20,7 @@ import eu.stratosphere.pact.client.RemoteExecutor
 import eu.stratosphere.tpch.config.TPCHConfig
 import eu.stratosphere.tpch.query.TPCHQuery
 import eu.stratosphere.tpch.query.TPCHQuery01
+import eu.stratosphere.tpch.query.TPCHQuery02
 import eu.stratosphere.scala.ScalaPlan
 import eu.stratosphere.tpch.config.TPCHConfig
 
@@ -59,6 +60,7 @@ abstract class AbstractJobRunner {
    */
   protected def createQuery(c: TPCHConfig): Option[TPCHQuery] = c.queryNo match {
     case 1 => Option(new TPCHQuery01(c.queryNo, c.dop, c.inPath, c.outPath, c.delta))
+    case 2 => Option(new TPCHQuery02(c.queryNo, c.dop, c.inPath, c.outPath, c.sizes(0), c.`type`, c.region))
     case _ => Option(null)
   }
 
