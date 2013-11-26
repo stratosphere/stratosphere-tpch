@@ -40,7 +40,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[Int]("[delta]")
-          .action { (x, c) => c.copy(`delta` = x) }
+          .action { (x, c) => c.copy(delta = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q02")
@@ -49,13 +49,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[Int]("[size]")
-          .action { (x, c) => c.copy(`sizes` = List(x)) }
+          .action { (x, c) => c.copy(sizes = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[type]")
-          .action { (x, c) => c.copy(`type` = x) }
+          .action { (x, c) => c.copy(ptype = x) }
           .text("TPC-H query parameter"),
         arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
+          .action { (x, c) => c.copy(region = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q03")
@@ -64,10 +64,10 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[segment]")
-          .action { (x, c) => c.copy(`segment` = x) }
+          .action { (x, c) => c.copy(segment = x) }
           .text("TPC-H query parameter"),
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q04")
@@ -79,7 +79,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
           .action { (x, c) => c.copy(outPath = x) }
           .text("Output path for the query result"),
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q05")
@@ -88,10 +88,10 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
+          .action { (x, c) => c.copy(region = x) }
           .text("TPC-H query parameter"),
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q06")
@@ -100,13 +100,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter"),
         arg[Double]("[discount]")
-          .action { (x, c) => c.copy(`discount` = x) }
+          .action { (x, c) => c.copy(discount = x) }
           .text("TPC-H query parameter"),
         arg[Int]("[quantity]")
-          .action { (x, c) => c.copy(`quantities` = List(x)) }
+          .action { (x, c) => c.copy(quantities = List(x)) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q07")
@@ -115,10 +115,10 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[nation1]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[nation2]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q08")
@@ -127,13 +127,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[region]")
-          .action { (x, c) => c.copy(`region` = x) }
+          .action { (x, c) => c.copy(region = x) }
           .text("TPC-H query parameter"),
         arg[String]("[type]")
-          .action { (x, c) => c.copy(`type` = x) }
+          .action { (x, c) => c.copy(ptype = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q09")
@@ -142,7 +142,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[color]")
-          .action { (x, c) => c.copy(`color` = x) }
+          .action { (x, c) => c.copy(color = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q10")
@@ -151,7 +151,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q11")
@@ -160,10 +160,10 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter"),
         arg[Double]("[fraction]")
-          .action { (x, c) => c.copy(`fraction` = x) }
+          .action { (x, c) => c.copy(fraction = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q12")
@@ -172,13 +172,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[shipmode1]")
-          .action { (x, c) => c.copy(`shipmodes` = List(x)) }
+          .action { (x, c) => c.copy(shipmodes = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[shipmode2]")
-          .action { (x, c) => c.copy(`shipmodes` = List(x)) }
+          .action { (x, c) => c.copy(shipmodes = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q13")
@@ -187,7 +187,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[words]")
-          .action { (x, c) => c.copy(`shipmodes` = c.words :+ x) }
+          .action { (x, c) => c.copy(shipmodes = c.words :+ x) }
           .minOccurs(2)
           .maxOccurs(2)
           .text("TPC-H query parameter" + NL))
@@ -198,7 +198,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q15")
@@ -207,7 +207,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q16")
@@ -216,13 +216,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[brand]")
-          .action { (x, c) => c.copy(`brands` = List(x)) }
+          .action { (x, c) => c.copy(brands = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[type]")
-          .action { (x, c) => c.copy(`type` = x) }
+          .action { (x, c) => c.copy(ptype = x) }
           .text("TPC-H query parameter"),
         arg[Int]("[sizes]")
-          .action { (x, c) => c.copy(`sizes` = c.sizes :+ x) }
+          .action { (x, c) => c.copy(sizes = c.sizes :+ x) }
           .minOccurs(8)
           .maxOccurs(8)
           .text("TPC-H query parameters" + NL))
@@ -233,10 +233,10 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[brand]")
-          .action { (x, c) => c.copy(`brands` = List(x)) }
+          .action { (x, c) => c.copy(brands = List(x)) }
           .text("TPC-H query parameter"),
         arg[String]("[container]")
-          .action { (x, c) => c.copy(`container` = x) }
+          .action { (x, c) => c.copy(container = x) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q18")
@@ -245,7 +245,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[Int]("[quantity]")
-          .action { (x, c) => c.copy(`quantities` = List(x)) }
+          .action { (x, c) => c.copy(quantities = List(x)) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q19")
@@ -254,12 +254,12 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[Int]("[quantities]")
-          .action { (x, c) => c.copy(`quantities` = c.quantities :+ x) }
+          .action { (x, c) => c.copy(quantities = c.quantities :+ x) }
           .minOccurs(3)
           .maxOccurs(3)
           .text("TPC-H query parameter"),
         arg[String]("[brands]")
-          .action { (x, c) => c.copy(`brands` = c.brands :+ x) }
+          .action { (x, c) => c.copy(brands = c.brands :+ x) }
           .minOccurs(3)
           .maxOccurs(3)
           .text("TPC-H query parameter" + NL))
@@ -270,13 +270,13 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[color]")
-          .action { (x, c) => c.copy(`color` = x) }
+          .action { (x, c) => c.copy(color = x) }
           .text("TPC-H query parameter"),
         arg[String]("[date]")
-          .action { (x, c) => c.copy(`date` = x) }
+          .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter"),
         arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q21")
@@ -285,7 +285,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[nation]")
-          .action { (x, c) => c.copy(`nations` = List(x)) }
+          .action { (x, c) => c.copy(nations = List(x)) }
           .text("TPC-H query parameter" + NL))
 
     cmd("Q22")
@@ -294,7 +294,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .children(commonQueryArgs(this): _*)
       .children(
         arg[String]("[codes]")
-          .action { (x, c) => c.copy(`codes` = c.codes :+ x) }
+          .action { (x, c) => c.copy(codes = c.codes :+ x) }
           .text("TPC-H query parameter" + NL))
   }
 

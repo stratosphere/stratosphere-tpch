@@ -20,7 +20,65 @@ import scala.language.reflectiveCalls
 import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
 
-class TPCHQuery02(queryNo: Int, dop: Int, inPath: String, outPath: String, size: Int, `type`: String, region: String) extends TPCHQuery(queryNo, dop, inPath, outPath) {
+import eu.stratosphere.tpch.schema._
+
+/**
+ * Original query:
+ *
+ * {{{
+ * select
+ * 	s_acctbal,
+ * 	s_name,
+ * 	n_name,
+ * 	p_partkey,
+ * 	p_mfgr,
+ * 	s_address,
+ * 	s_phone,
+ * 	s_comment
+ * from
+ * 	part,
+ * 	supplier,
+ * 	partsupp,
+ * 	nation,
+ * 	region
+ * where
+ * 	p_partkey = ps_partkey
+ * 	and s_suppkey = ps_suppkey
+ * 	and p_size = :SIZE
+ * 	and p_type like '%:TYPE'
+ * 	and s_nationkey = n_nationkey
+ * 	and n_regionkey = r_regionkey
+ * 	and r_name = ':REGION'
+ * 	and ps_supplycost = (
+ * 		select
+ * 			min(ps_supplycost)
+ * 		from
+ * 			partsupp,
+ * 			supplier,
+ * 			nation,
+ * 			region
+ * 		where
+ * 			p_partkey = ps_partkey
+ * 			and s_suppkey = ps_suppkey
+ * 			and s_nationkey = n_nationkey
+ * 			and n_regionkey = r_regionkey
+ * 			and r_name = ':REGION'
+ * 	)
+ * order by
+ * 	s_acctbal desc,
+ * 	n_name,
+ * 	s_name,
+ * 	p_partkey;
+ * }}}
+ *
+ * @param dop Degree of parallism
+ * @param inPath Base input path
+ * @param outPath Output path
+ * @param size Query parameter `SIZE`
+ * @param ptype Query parameter `TYPE`
+ * @param region Query parameter `REGION`
+ */
+class TPCHQuery02(dop: Int, inPath: String, outPath: String, size: Int, ptype: String, region: String) extends TPCHQuery(2, dop, inPath, outPath) {
 
   def plan(): ScalaPlan = {
 
@@ -28,7 +86,7 @@ class TPCHQuery02(queryNo: Int, dop: Int, inPath: String, outPath: String, size:
     val nation = Nation(inPath)
     val supplier = Supplier(inPath)
     val partsupp = PartSupp(inPath)
-    val part = Part(inPath) filter (p => p.size == this.size && p.`type`.indexOf(`type`) == p.`type`.length - this.`type`.length)
+    val part = Part(inPath) filter (p => p.size == this.size && p.ptype.indexOf(ptype) == p.ptype.length - this.ptype.length)
 
     val e1 = region join nation where (_.regionKey) isEqualTo (_.regionKey) map {
       (r, n) => (n.name, n.nationKey)
@@ -51,6 +109,6 @@ class TPCHQuery02(queryNo: Int, dop: Int, inPath: String, outPath: String, size:
     val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
 
-    return plan
+    plan
   }
 }

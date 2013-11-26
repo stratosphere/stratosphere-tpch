@@ -15,10 +15,11 @@
  */
 package eu.stratosphere.tpch.query
 
-import eu.stratosphere.scala._
-import eu.stratosphere.scala.operators._
+import eu.stratosphere.scala.ScalaPlan
+
+import eu.stratosphere.tpch.config.TPCHConfig
+
 import org.joda.time.DateTime
-import scopt.OptionParser
 
 /**
  * An abstract base class for all TPC-H queries.
@@ -35,130 +36,19 @@ abstract class TPCHQuery(queryNo: Int, dop: Int, inPath: String, outPath: String
   def plan(): ScalaPlan
 }
 
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * Case classes for the TPC-H schema
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+object TPCHQuery {
 
-case class Nation(
-  nationKey: Int,
-  name: String,
-  regionKey: Int,
-  comment: String)
+  def string2date(dateTime: String): DateTime = DateTime.parse(dateTime)
 
-case class Region(
-  regionKey: Int,
-  name: String,
-  comment: String)
+  def date2string(dateTime: DateTime): String = dateTime.toString("yyyy-MM-dd")
 
-case class Part(
-  partKey: Int,
-  name: String,
-  mfgr: String,
-  brand: String,
-  `type`: String,
-  size: Int,
-  container: String,
-  retailPrice: Double,
-  comment: String)
-
-case class Supplier(
-  suppKey: Int,
-  name: String,
-  address: String,
-  nationKey: Int,
-  phone: String,
-  accBal: Double,
-  comment: String)
-
-case class PartSupp(
-  partKey: Int,
-  suppKey: Int,
-  availQty: Int,
-  supplyCost: Double,
-  comment: String)
-
-case class Customer(
-  custKey: Int,
-  name: String,
-  address: String,
-  nationKey: Int,
-  phone: String,
-  accBal: Double,
-  mktSegment: String,
-  comment: String)
-
-case class Order(
-  orderKey: Int,
-  custKey: Int,
-  orderStatus: String,
-  totalPrice: Double,
-  orderDate: String,
-  orderPriority: String,
-  clerk: String,
-  shipPriority: Int,
-  comment: String)
-
-case class Lineitem(
-  orderKey: Int,
-  partKey: Int,
-  suppKey: Int,
-  lineNumber: Int,
-  quantity: Int,
-  extendedPrice: Double,
-  discount: Double,
-  tax: Double,
-  returnFlag: String,
-  lineStatus: String,
-  shipDate: String,
-  commitDate: String,
-  receiptDate: String,
-  shipInstruct: String,
-  shipMode: String,
-  comment: String)
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * DataSource helpers
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-object Nation {
-  def apply(inPath: String) = DataSource(s"$inPath/nation.tbl", CsvInputFormat[Nation]("\n", "|"))
-}
-
-object Region {
-  def apply(inPath: String) = DataSource(s"$inPath/region.tbl", CsvInputFormat[Region]("\n", "|"))
-}
-
-object Part {
-  def apply(inPath: String) = DataSource(s"$inPath/part.tbl", CsvInputFormat[Part]("\n", "|"))
-}
-
-object Supplier {
-  def apply(inPath: String) = DataSource(s"$inPath/supplier.tbl", CsvInputFormat[Supplier]("\n", "|"))
-}
-
-object PartSupp {
-  def apply(inPath: String) = DataSource(s"$inPath/partsupp.tbl", CsvInputFormat[PartSupp]("\n", "|"))
-}
-
-object Customer {
-  def apply(inPath: String) = DataSource(s"$inPath/customer.tbl", CsvInputFormat[Customer]("\n", "|"))
-}
-
-object Order {
-  def apply(inPath: String) = DataSource(s"$inPath/order.tbl", CsvInputFormat[Order]("\n", "|"))
-}
-
-object Lineitem {
-  def apply(inPath: String) = DataSource(s"$inPath/lineitem.tbl", CsvInputFormat[Lineitem]("\n", "|"))
-}
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
- * Date handling helpers
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-object Date {
-
-  def fromString(dateTime: String): DateTime = DateTime.parse(dateTime)
-
-  def toString(dateTime: DateTime): String = dateTime.toString("yyyy-MM-dd")
+  /**
+   * Factory method for creation of TPC-H Queries.
+   */
+  def createQuery(c: TPCHConfig): Option[TPCHQuery] = c.queryNo match {
+    case 1 => Option(new TPCHQuery01(c.dop, c.inPath, c.outPath, c.delta))
+    case 2 => Option(new TPCHQuery02(c.dop, c.inPath, c.outPath, c.sizes(0), c.ptype, c.region))
+    case 3 => Option(new TPCHQuery03(c.dop, c.inPath, c.outPath, c.segment, string2date(c.date)))
+    case _ => Option(null)
+  }
 }

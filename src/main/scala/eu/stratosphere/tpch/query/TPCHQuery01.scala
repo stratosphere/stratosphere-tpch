@@ -20,7 +20,41 @@ import scala.language.reflectiveCalls
 import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
 
-class TPCHQuery01(queryNo: Int, dop: Int, inPath: String, outPath: String, delta: Int) extends TPCHQuery(queryNo, dop, inPath, outPath) {
+import eu.stratosphere.tpch.schema._
+
+/**
+ * Original query:
+ *
+ * {{{
+ * select
+ * 	l_returnflag,
+ * 	l_linestatus,
+ * 	sum(l_quantity) as sum_qty,
+ * 	sum(l_extendedprice) as sum_base_price,
+ * 	sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,
+ * 	sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,
+ * 	avg(l_quantity) as avg_qty,
+ * 	avg(l_extendedprice) as avg_price,
+ * 	avg(l_discount) as avg_disc,
+ * 	count(*) as count_order
+ * from
+ * 	lineitem
+ * where
+ * 	l_shipdate <= date '1998-12-01' - interval ':DELTA' day (3)
+ * group by
+ * 	l_returnflag,
+ * 	l_linestatus
+ * order by
+ * 	l_returnflag,
+ * 	l_linestatus;
+ * }}}
+ *
+ * @param dop Degree of parallism
+ * @param inPath Base input path
+ * @param outPath Output path
+ * @param delta Query parameter `DELTA`
+ */
+class TPCHQuery01(dop: Int, inPath: String, outPath: String, delta: Int) extends TPCHQuery(1, dop, inPath, outPath) {
 
   case class Aggregate(
     returnFlag: String,
@@ -34,10 +68,10 @@ class TPCHQuery01(queryNo: Int, dop: Int, inPath: String, outPath: String, delta
 
   def plan(): ScalaPlan = {
 
-    val dateMax = Date.fromString("1998-12-01").minusDays(delta)
+    val dateMax = TPCHQuery.string2date("1998-12-01").minusDays(delta)
 
     val expression = Lineitem(inPath)
-      .filter(l => Date.fromString(l.shipDate).compareTo(dateMax) <= 0)
+      .filter(l => TPCHQuery.string2date(l.shipDate).compareTo(dateMax) <= 0)
       .map(l => Aggregate(
         l.returnFlag,
         l.lineStatus,
@@ -68,10 +102,11 @@ class TPCHQuery01(queryNo: Int, dop: Int, inPath: String, outPath: String, delta
         agg.sumBasePrice / agg.countOrder.toDouble,
         agg.sumDiscount / agg.countOrder.toDouble,
         agg.countOrder)))
+    // TODO: sort expression on (_1 asc, _2 asc)
 
     val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
 
-    return plan
+    plan
   }
 }
