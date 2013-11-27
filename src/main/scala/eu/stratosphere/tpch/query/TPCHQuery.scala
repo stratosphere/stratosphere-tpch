@@ -26,7 +26,7 @@ import org.joda.time.DateTime
  */
 abstract class TPCHQuery(queryNo: Int, dop: Int, inPath: String, outPath: String) extends Serializable {
 
-  val queryName = s"TPC-H Query #${queryNo}02d"
+  val queryName = f"TPC-H Query #${queryNo}%02d"
 
   /**
    * Abstract plan generation method. In concrete implementations, use the

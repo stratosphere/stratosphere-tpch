@@ -321,7 +321,7 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .text("Base path for the TPC-H inputs"),
     parser.arg[String]("[out]")
       .action { (x, c) => c.copy(outPath = x) }
-      .text("Output path for the query result"))
+      .text("Base path for the query result"))
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*

@@ -39,7 +39,7 @@ abstract class AbstractJobRunner {
         TPCHQuery.createQuery(config)
           .map(query => executeQuery(query.plan()))
           .getOrElse {
-            System.err.println(s"Sorry, TPC-H Query #${config.queryNo}%02d is not yet supported.")
+            System.err.println(f"Sorry, TPC-H Query #${config.queryNo}%02d is not yet supported.")
           }
       } catch {
         case e: Throwable => {
@@ -61,7 +61,7 @@ abstract class AbstractJobRunner {
 
 /**
  * To run TPCH Query X locally with this class using:
- * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobLocal QXX 2 file:///tpch/path file:///query/result/path <Query-X-args>"
+ * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.LocalJobRunner QXX 2 file:///tpch/path file:///output/path <Query-X-args>"
  */
 object LocalJobRunner extends AbstractJobRunner {
 
@@ -72,7 +72,7 @@ object LocalJobRunner extends AbstractJobRunner {
 
 /**
  * To run TPCH Query X on a cluster with this class using:
- * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RunJobRemote QXX 2 file:///some/path file:///some/other/path <Query-X-args>"
+ * mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp %classpath eu.stratosphere.tpch.RemoteJobRunner QXX 2 file:///input/path file:///output/path <Query-X-args>"
  */
 object RemoteJobRunner extends AbstractJobRunner {
 
