@@ -75,7 +75,7 @@ class TPCHQuery03(dop: Int, inPath: String, outPath: String, segment: String, da
     }
     // TODO: sort e4 on (_2 desc, _3 asc)
 
-    val expression = e2.write(s"$outPath/query03.result", DelimitedOutputFormat(x => "%d|%f|%s|%d".format(x._1, x._2, x._2, x._4)))
+    val expression = e2.write(s"$outPath/query03.result", DelimitedOutputFormat(x => "%d|%f|%s|%s".format(x._1, x._2, x._2, x._4)))
 
     val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
