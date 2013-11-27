@@ -87,7 +87,7 @@ package object schema {
     comment: String)
 
   /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
-   * DataSource helpers
+   * Companion objects
    *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
   object Nation {
@@ -115,7 +115,7 @@ package object schema {
   }
 
   object Order {
-    def apply(inPath: String) = DataSource(s"$inPath/order.tbl", CsvInputFormat[Order]("\n", '|'))
+    def apply(inPath: String) = DataSource(s"$inPath/orders.tbl", CsvInputFormat[Order]("\n", '|'))
   }
 
   object Lineitem {
