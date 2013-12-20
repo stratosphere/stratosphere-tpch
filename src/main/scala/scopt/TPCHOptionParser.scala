@@ -18,6 +18,7 @@ package scopt
 import collection.mutable.{ ListBuffer, ListMap }
 import eu.stratosphere.tpch.config.TPCHConfig
 
+
 /**
  * Scopt OptionParser specialization for this application.
  */
@@ -75,9 +76,6 @@ class TPCHOptionParser extends OptionParser[TPCHConfig]("stratosphere-tpch") {
       .action { (x, c) => c.copy(queryNo = 4) }
       .children(commonQueryArgs(this): _*)
       .children(
-        arg[String]("[out]")
-          .action { (x, c) => c.copy(outPath = x) }
-          .text("Output path for the query result"),
         arg[String]("[date]")
           .action { (x, c) => c.copy(date = x) }
           .text("TPC-H query parameter" + NL))
