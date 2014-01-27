@@ -111,10 +111,3 @@ class TPCHQuery18(dop: Int, inPath: String, outPath: String, quantity: Int) exte
     plan
   }
 }
-
-object RunQuery {
-  def main(args: Array[String]) {
-    val q = new TPCHQuery18(4, "file:///home/fhueske/tpch-s1/text", "file:///home/fhueske/result", 300)
-    LocalExecutor.execute(q.plan)
-  }
-}

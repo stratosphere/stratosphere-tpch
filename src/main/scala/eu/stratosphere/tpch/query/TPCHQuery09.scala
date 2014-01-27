@@ -16,99 +16,131 @@
 package eu.stratosphere.tpch.query
 
 import scala.language.reflectiveCalls
-
 import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
-
 import eu.stratosphere.tpch.schema._
+
+import eu.stratosphere.pact.client.LocalExecutor
 
 /**
  * Original query:
  *
  * {{{
-select
-	nation,
-	o_year,
-	sum(amount) as sum_profit
-from
-	(
-		select
-			n_name as nation,
-			extract(year from o_orderdate) as o_year,
-			l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount
-		from
-			part,
-			supplier,
-			lineitem,
-			partsupp,
-			orders,
-			nation
-		where
-			s_suppkey = l_suppkey *
-			and ps_suppkey = l_suppkey *
-			and ps_partkey = l_partkey *
-			and p_partkey = l_partkey *
-			and o_orderkey = l_orderkey
-			and s_nationkey = n_nationkey *
-			and p_name like '%:1%' *
-	) as profit
-group by
-	nation,
-	o_year
-order by
-	nation,
-	o_year desc;
+ * select
+ * nation,
+ * o_year,
+ * sum(amount) as sum_profit
+ * from
+ * (select
+ *   n_name as nation,
+ *   extract(year from o_orderdate) as o_year,
+ *   l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount
+ *  from
+ *   part,
+ *   supplier,
+ *   lineitem,
+ *   partsupp,
+ *   orders,
+ *   nation
+ *  where
+ *   s_suppkey = l_suppkey
+ *   and ps_suppkey = l_suppkey
+ *   and ps_partkey = l_partkey 
+ *   and p_partkey = l_partkey 
+ *   and o_orderkey = l_orderkey
+ *   and s_nationkey = n_nationkey
+ *   and p_name like '%:COLOR%'
+ * ) as profit
+ * group by
+ *  nation,
+ *  o_year
+ * order by
+ * 	nation,
+ * 	o_year desc;
  * }}}
  *
- * @param dop Degree of parallism
+ * @param dop Degree of parallelism
  * @param inPath Base input path
  * @param outPath Output path
- * @param color Query parameter `COLOR`  -> default: green
+ * @param color Query parameter `COLOR`
  */
 class TPCHQuery09(dop: Int, inPath: String, outPath: String, color: String) extends TPCHQuery(9, dop, inPath, outPath) {
 
+   // TODO: order by year and nation missing
+  
   def plan(): ScalaPlan = {
-  
-  
-    val part = Part(inPath) filter (p => p.name.indexOf(color) != -1)
-    val supplier = Supplier(inPath)
-    val lineitem = Lineitem(inPath)
-    val partsupp = PartSupp(inPath)
-    val order = Order(inPath)
-    val nation = Nation(inPath)
+    
+    // scan Part, filter, and project
+    val part = ( Part(inPath) 
+                 filter (p => p.name.indexOf(color) != -1)
+                 map { p => p.partKey }
+               )
+               
+    // scan supplier and project
+    val supplier = ( Supplier(inPath)
+                     map { s => (s.suppKey, s.nationKey) }
+                   )
 
-    var e1 = lineitem join part where (_.partKey) isEqualTo (_.partKey) map {
-      (l, p) => (l.suppKey, l.partKey, l.orderKey, l.extendedPrice, l.discount, l.quantity)
-    }
-	
-    val e2 = e1 join supplier where (_._1) isEqualTo (_.suppKey) map {
-      (x, s) => (x._1, x._2, x._3, x._4, x._5, x._6, s.nationKey)
-    }
-	
-    val e3 = e2 join nation where (_._7) isEqualTo (_.nationKey) map {
-      (x, n) => (x._1, x._2, x._3, x._4, x._5, x._6, n.name)
-    }
-	
-   // val e4 = e3 join partsupp where(_._2, _._1)) isEqualTo ( x => (_.partKey, _.suppKey) map {
-    val e4 = e3 join partsupp where(_._1) isEqualTo ( _.suppKey) map {
-	  (x, ps) => (x._1, x._2, ps.partKey, x._3, x._4 * (1 -  x._5) - ps.supplyCost * x._6, x._7)
-    } filter (x => x._2 == x._3)
-	
-    val e5 = e4 join order where (_._4) isEqualTo (_.orderKey) map {
-      (x, o) => (x._5, x._6, TPCHQuery.string2date(o.orderDate).getYear())
-    }
-	
-    val e6 = e5.groupBy(x => (x._2, x._3)).reduce(
-      (x, y) => ( x._1 + y._1, x._2, x._3)
-    )
+    // scan lineitem and project
+    val lineitem = ( Lineitem(inPath)
+                     map { l => (l.orderKey, l.suppKey, l.partKey, (l.extendedPrice * (1.0 - l.discount)), l.quantity) }
+                   )
 
-    // TODO: sort e6 on (_2 asc, _3 desc)
+    // scan partsupp and project
+    val partsupp = ( PartSupp(inPath)
+                     map { ps => (ps.suppKey, ps.partKey, ps.supplyCost) }
+                   )
 
-    val expression = e6.write(s"$outPath/query09.result", DelimitedOutputFormat(x => "%s|%s|%f".format(x._2, x._3, x._1)))
+    // scan orders and project
+    val order = ( Order(inPath)
+                  map { o => (o.orderKey, TPCHQuery.string2date(o.orderDate).getYear()) }
+                )
+
+    // scan nation and project
+    val nation = ( Nation(inPath)
+                   map { n => (n.nationKey, n.name) }
+                 )
+
+    // join lineitem and part                 
+    val lp = ( lineitem join part where (_._3) isEqualTo ( p => p ) 
+               map { (l, p) => l }
+             )
+    
+   // join lineitem-part and partsupp
+    val lpps = ( lp join partsupp where (lp => (lp._2, lp._3)) isEqualTo (ps => (ps._1 , ps._2) )
+                 map { (lp, ps) => (lp._1, lp._2, (lp._4 - (ps._3 * lp._5)) )  }
+	           )
+
+    // join lineitem-part-partsupp and orders
+	val lppso = ( lpps join order where ( _._1 ) isEqualTo ( _._1 ) 
+	              map { (x, o) => (x._2, o._2, x._3) }
+	            )
+
+    // join lineitem-part-partsupp-orders and supplier, group by nation and year, and compute sum
+    val lppsos = ( lppso join supplier where (_._1) isEqualTo (_._1) 
+                   map { (x, s) => (s._2, x._2, x._3) }
+    			   groupBy ( x => (x._1, x._2) )
+    			   reduce { (x1, x2) => (x1._1, x1._2, (x1._3 + x2._3)) }
+                 )
+
+    // join with nation
+    val lppsosn = ( lppsos join nation where ( _._1 ) isEqualTo ( _._1)
+                    map { (x, n) => (n._2, x._2, x._3 ) }
+                  )
+   
+    // write result
+    val expression = lppsosn.write(s"$outPath/query09.result", DelimitedOutputFormat(x => "%s|%d|%f".format(x._1, x._2, x._3)))
 
     val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
 
     plan
+  }
+}
+
+object RunQuery {
+  def main(args: Array[String]) {
+    val q = new TPCHQuery09(4, "file:///home/fhueske/tpch-s1/text", "file:///home/fhueske/result", "green")
+    LocalExecutor.execute(q.plan)
   }
 }
