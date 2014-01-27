@@ -20,7 +20,6 @@ import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
 import eu.stratosphere.tpch.schema._
 import org.joda.time.DateTime
-import eu.stratosphere.pact.client.LocalExecutor
 
 /**
  * Original query:
@@ -75,13 +74,6 @@ class TPCHQuery06(dop: Int, inPath: String, outPath: String, date: DateTime, dis
     plan.setDefaultParallelism(dop)
 
     plan
-  }
-}
-
-object RunQuery {
-  def main(args: Array[String]) {
-    val q = new TPCHQuery06(4, "file:///home/fhueske/tpch-s1/text", "file:///home/fhueske/result", new DateTime(1994,1,1,0,0), 0.06, 24)
-    LocalExecutor.execute(q.plan)
   }
 }
 
