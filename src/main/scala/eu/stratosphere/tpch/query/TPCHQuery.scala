@@ -50,6 +50,7 @@ object TPCHQuery {
     case 2  => Option(new TPCHQuery02(c.dop, c.inPath, c.outPath, c.sizes(0), c.ptype, c.region))
     case 3  => Option(new TPCHQuery03(c.dop, c.inPath, c.outPath, c.segment, string2date(c.date)))
     case 4  => Option(new TPCHQuery04(c.dop, c.inPath, c.outPath, string2date(c.date)))
+    case 5  => Option(new TPCHQuery05(c.dop, c.inPath, c.outPath, c.region, string2date(c.date)))
     case 9  => Option(new TPCHQuery09(c.dop, c.inPath, c.outPath, c.color))
     case 10 => Option(new TPCHQuery10(c.dop, c.inPath, c.outPath, string2date(c.date)))
     case 11 => Option(new TPCHQuery11(c.dop, c.inPath, c.outPath, c.nations(0), c.fraction))
