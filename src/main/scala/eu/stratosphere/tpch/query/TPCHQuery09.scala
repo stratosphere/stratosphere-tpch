@@ -20,8 +20,6 @@ import eu.stratosphere.scala._
 import eu.stratosphere.scala.operators._
 import eu.stratosphere.tpch.schema._
 
-import eu.stratosphere.pact.client.LocalExecutor
-
 /**
  * Original query:
  *
