@@ -108,7 +108,7 @@ class TPCHQuery05(dop: Int, inPath: String, outPath: String, rName: String, date
                  )
        
     // write result
-    val expression = result.write(s"$outPath/query03.result", DelimitedOutputFormat(x => "%s|%f".format(x._1, x._2)))
+    val expression = result.write(s"$outPath/query05.result", DelimitedOutputFormat(x => "%s|%f".format(x._1, x._2)))
 
     val plan = new ScalaPlan(Seq(expression), queryName)
     plan.setDefaultParallelism(dop)
